@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MediTrack</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+      background-color: #e0f7f9;
+    }
+    header {
+      background-color: #00b0b6;
+      color: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .login {
+      display: flex;
+      gap: 10px;
+    }
+    .login button {
+      background-color: #007f91;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 20px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .section {
+      display: none;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      margin-top: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .active {
+      display: block;
+    }
+    .btn {
+      padding: 12px 20px;
+      background: #007f91;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-weight: bold;
+      margin: 10px;
+      cursor: pointer;
+    }
+    select, input[type="text"] {
+      padding: 10px;
+      width: 80%;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    ul li {
+      background-color: #e0f7fa;
+      margin: 10px 0;
+      padding: 20px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    ul li img {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+    .hospital-info {
+      flex: 1;
+    }
+    .hospital-info h3 {
+      margin: 0 0 5px 0;
+      color: #0077b6;
+    }
+    .hospital-info p {
+      margin: 4px 0;
+    }
+    .hospital-info .status {
+      font-weight: bold;
+      color: green;
+    }
+    .hospital-actions a {
+      display: inline-block;
+      margin-top: 10px;
+      background: #007f91;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    h2 {
+      color: #0077b6;
+      text-align: center;
+    }
+    .center {
+      text-align: center;
+    }
+    .tag {
+      background: #007f91;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 15px;
+      margin: 5px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>MediTrack</h1>
+  <div class="login">
+    <button onclick="alert('Google Login (demo)')">Login with Google</button>
+    <button onclick="alert('Mobile Login (demo)')">Login with Mobile</button>
+  </div>
+</header>
+
+<div class="section active" id="page1">
+  <div class="center">
+    <h2>Welcome to MediTrack</h2>
+    <button class="btn" onclick="showPage('page2')">Find Hospital</button>
+    <button class="btn" onclick="showPage('page4')">Find Doctor</button>
+  </div>
+</div>
+
+<div class="section" id="page2">
+  <h2>Select Your Location</h2>
+  <select id="locationInput">
+    <option value="">--Choose City--</option>
+    <option value="Khammam">Khammam</option>
+    <option value="Warangal">Warangal</option>
+    <option value="Hyderabad">Hyderabad</option>
+  </select>
+  <button class="btn" onclick="searchLocation()">Search</button>
+</div>
+
+<div class="section" id="page3">
+  <h2>Hospitals in <span id="locName">City</span></h2>
+  <ul id="hospitalList"></ul>
+  <div class="center">
+    <button class="btn" onclick="showPage('page1')">Back to Home</button>
+  </div>
+</div>
+
+<div class="section" id="page4">
+  <h2>Search Doctor</h2>
+  <input type="text" id="issueInput" placeholder="Enter Health Issue">
+  <input type="text" id="locationInput2" placeholder="Enter Location (e.g., Khammam)">
+  <button class="btn" onclick="searchDoctors()">Search</button>
+</div>
+
+<div class="section" id="page5">
+  <h2>Doctors for <span id="selectedIssue">Issue</span> in <span id="selectedLocation">City</span></h2>
+  <div class="center">
+    <span class="tag" id="tagIssue"></span>
+    <span class="tag" id="tagLocation"></span>
+  </div>
+  <ul id="doctorList"></ul>
+  <div class="center">
+    <button class="btn" onclick="showPage('page1')">Back to Home</button>
+  </div>
+</div>
+
+<script>
+  function showPage(id) {
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function searchLocation() {
+    const location = document.getElementById("locationInput").value.trim();
+    if (location) {
+      updateHospitals(location);
+      showPage('page3');
+    }
+  }
+
+  function updateHospitals(city) {
+    const hospitalsData = {
+      Khammam: [
+        { name: "Mamata General Hospital", phone: "08742-255123", open: "8AM", close: "6PM", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJ3ctapCtlh0GlKXrRNxOgl6REO0KQGQnvNRI3YeIJ3N2r1WSeBmlMalXeR2ElEA7Cq3w&usqp=CAU" },
+        { name: "Ravi Hospital", phone: "08742-233100", open: "9AM", close: "5PM", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSh4ZSfedrbuodJtXzcoJQG0oXoyD98eEUlrg&s" }
+      ],
+      Warangal: [
+        { name: "Kakatiya Medical College", phone: "0870-2444244", open: "9AM", close: "6PM", img: "https://cdn.pixabay.com/photo/2015/09/17/17/25/hospital-942103_1280.jpg" },
+        { name: "Vaishnavi Hospital", phone: "0870-2455666", open: "10AM", close: "5PM", img: "https://cdn.pixabay.com/photo/2014/07/10/17/17/hospital-389233_1280.jpg" }
+      ],
+      Hyderabad: [
+        { name: "Apollo Hospital", phone: "040-23607777", open: "24 Hours", close: "", img: "https://cdn.pixabay.com/photo/2016/03/31/20/51/hospital-1296213_1280.png" },
+        { name: "Sunshine Hospital", phone: "040-44557777", open: "24 Hours", close: "", img: "https://cdn.pixabay.com/photo/2014/07/10/17/17/hospital-389233_1280.jpg" }
+      ]
+    };
+    const list = document.getElementById("hospitalList");
+    document.getElementById("locName").textContent = city;
+    list.innerHTML = "";
+    hospitalsData[city].forEach(hosp => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <img src="${hosp.img}" alt="hospital">
+        <div class="hospital-info">
+          <h3>${hosp.name}</h3>
+          <p>Phone: ${hosp.phone}</p>
+          <p>Timings: ${hosp.open}${hosp.close ? ' - ' + hosp.close : ''}</p>
+          <p class="status">${hosp.open.toLowerCase().includes("24") ? 'Open Now' : 'Call to Confirm'}</p>
+          <div class="hospital-actions">
+            <a href="tel:${hosp.phone}">Call Now</a>
+            <a href="https://www.google.com/maps/search/${encodeURIComponent(hosp.name + ', ' + city)}" target="_blank">Directions</a>
+          </div>
+        </div>`;
+      list.appendChild(li);
+    });
+  }
+
+  function searchDoctors() {
+    const issue = document.getElementById("issueInput").value.trim();
+    const location = document.getElementById("locationInput2").value.trim();
+    const doctorList = document.getElementById("doctorList");
+    if (issue && location) {
+      document.getElementById("selectedIssue").textContent = issue;
+      document.getElementById("selectedLocation").textContent = location;
+      document.getElementById("tagIssue").textContent = issue;
+      document.getElementById("tagLocation").textContent = location;
+
+      const doctorsData = {
+        Khammam: [
+          "Dr. Asha Rani – Cardiologist, Mamata Hospital (9AM - 1PM)",
+          "Dr. Kiran Yadav – Pediatrician, Ravi Hospital (10AM - 2PM)",
+          "Dr. Swathi Rao – Dermatologist, Prasad Hospital (11AM - 3PM)",
+          "Dr. Sandeep Reddy – General Physician, Apollo Clinic (8AM - 12PM)"
+        ],
+        Warangal: [
+          "Dr. Laxmi Devi – Gynecologist, Vaishnavi Hospital (10AM - 5PM)",
+          "Dr. Anand Kumar – ENT, Kakatiya Hospital (9AM - 2PM)",
+          "Dr. Varun Reddy – Urologist, Sunrise Hospital (12PM - 4PM)",
+          "Dr. Shalini – Orthopedic, Sunrise Hospital (2PM - 6PM)"
+        ],
+        Hyderabad: [
+          "Dr. Rakesh Goud – Oncologist, Apollo (24x7)",
+          "Dr. Priya Desai – Neurologist, Sunshine Hospital (10AM - 6PM)",
+          "Dr. Manohar – Orthopedic, Medicover (8AM - 8PM)",
+          "Dr. Neha Singh – Pulmonologist, KIMS (11AM - 4PM)"
+        ]
+      };
+
+      const list = doctorsData[location] || ["No doctors found. Please enter a valid location."];
+      doctorList.innerHTML = "";
+      list.forEach(doc => {
+        const li = document.createElement("li");
+        li.textContent = doc;
+        doctorList.appendChild(li);
+      });
+      showPage('page5');
+    }
+  }
+</script>
+
+</body>
+</html>
